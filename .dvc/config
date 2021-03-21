@@ -1,0 +1,4 @@
+[core]
+    remote = amazon_data
+['remote "amazon_data"']
+    url = s3://ingwar-kaggle-chest-xray/data
