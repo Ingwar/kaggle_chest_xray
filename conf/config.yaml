@@ -1,0 +1,24 @@
+data:
+  train:
+    data_dir: data/train
+    metadata: data/train_split.csv
+    loader:
+      batch_size: ${data.default_loader.batch_size}
+      num_workers: ${data.default_loader.num_workers}
+    crop:
+      width: 800
+      height: 800
+  validation:
+    data_dir: ${data.train.data_dir}
+    metadata: data/validation.csv
+    loader:
+      batch_size: ${data.default_loader.batch_size}
+      num_workers: ${data.default_loader.num_workers}
+  test:
+    data_dir: data/test
+    loader:
+      batch_size: ${data.default_loader.batch_size}
+      num_workers: ${data.default_loader.num_workers}
+    default_loader:
+      batch_size: 12
+      num_workers: 48
