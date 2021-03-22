@@ -68,14 +68,14 @@ class InferenceDicomDataset(Dataset):
     def __init__(self, image_dir: Path, transform: Optional[Union[Compose, BasicTransform]] = None) -> None:
         self.transform = transform
         self.file_list = list(image_dir.glob('*'))
+        self.image_ids = [image_file.stem for image_file in self.file_list]
 
-    def __getitem__(self, index: int) -> Tuple[str, torch.Tensor]:
+    def __getitem__(self, index: int) -> Tuple[int, torch.Tensor]:
         image_file = self.file_list[index]
-        image_id = image_file.stem
         image = read_xray(image_file)
         if self.transform is not None:
             image = self.transform(image=image)
-        return image_id, image
+        return index, image
 
     def __len__(self) -> int:
         return len(self.file_list)
