@@ -26,7 +26,7 @@ def train_transform(crop_width: int, crop_height: int, additional_transforms: Li
         ToTensorV2(),
     ]
     transforms = initial_transforms + additional_transforms + final_transforms
-    return Compose(transforms, bbox_params=BboxParams(format='pascal_voc', label_fields=['category_ids']))
+    return Compose(transforms, bbox_params=BboxParams(format='pascal_voc', label_fields=['labels']))
 
 
 def train_aggressive_transform(crop_width: int, crop_height: int) -> Compose:

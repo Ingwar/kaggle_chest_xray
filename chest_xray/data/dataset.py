@@ -51,9 +51,12 @@ class XRayAnomalyDataset(Dataset):
         labels = np.array(labels)
         boxes = np.array(boxes)
         image = read_xray(image_file)
-        result = {'image': image, 'bboxes': boxes, 'category_ids': labels}
+        result = {'image': image, 'boxes': boxes, 'labels': labels}
         if self.transform is not None:
-            result = self.transform(image=image, bboxes=boxes, category_ids=labels)
+            result = self.transform(image=image, bboxes=boxes, labels=labels)
+            # Rename bounding boxes field to match torchvision expectations
+            boxes = result.pop('bboxes')
+            result['boxes'] = boxes
         return result
 
     def __len__(self) -> int:
