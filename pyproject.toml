@@ -13,9 +13,14 @@ pytorch-lightning = "^1.2.4"
 dvc = {extras = ["s3"], version = "^2.0.6"}
 pandas = "^1.2.3"
 pydicom = "^2.1.2"
+hydra-core = "^1.0.6"
+scikit-learn = "^0.24.1"
 
 [tool.poetry.dev-dependencies]
 kaggle = "^1.5.12"
+
+[tool.poetry.scripts]
+split-train-val = 'chest_xray.cli.split_train_val:main'
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
