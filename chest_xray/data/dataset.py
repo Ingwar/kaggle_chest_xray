@@ -72,7 +72,7 @@ class InferenceDicomDataset(Dataset):
         image_file = self.file_list[index]
         image = read_xray(image_file)
         if self.transform is not None:
-            image = self.transform(image=image)
+            image = self.transform(image=image)['image']
         return index, image
 
     def __len__(self) -> int:
