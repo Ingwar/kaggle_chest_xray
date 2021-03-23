@@ -58,11 +58,16 @@ class Experiment(LightningModule):
         return indices, predictions, targets
 
     def validation_epoch_end(self, outputs: List[Tuple[List[MetadataDict], List[MetadataDict]]]) -> None:
-        # TODO: add threshold
-        predictions, targets = self.restructure_validation_outputs(outputs)
-        mAP, ap_per_class = mean_average_precision_for_boxes(targets, predictions, iou_threshold=self.conf.evaluation.iou_threshold)
+        predictions, targets = self._restructure_validation_outputs(outputs)
+        mAP, ap_per_class = mean_average_precision_for_boxes(
+            targets,
+            predictions,
+            iou_threshold=self.conf.evaluation.iou_threshold,
+            verbose=False
+        )
         # TODO: Add DDP support
         self.log('mAP', mAP, prog_bar=True)
+        self.log_ap_per_class(ap_per_class)
 
     def predict(self, batch: InferenceBatch, batch_idx: int, dataloader_idx: Optional[int] = None) -> Tuple[torch.Tensor, BatchPredictions]:
         indices, images = batch
@@ -72,7 +77,12 @@ class Experiment(LightningModule):
     def configure_optimizers(self) -> Optimizer:
         return instantiate(self.conf.optimizer, self.parameters())
 
-    def restructure_validation_outputs(self, outputs: List[Tuple[List[MetadataDict], List[MetadataDict]]]) -> Tuple[np.ndarray, np.ndarray]:
+    def log_ap_per_class(self, ap_per_class: Dict[str, Tuple[float, float]]) -> None:
+        for label, (average_precision, num_annotations) in ap_per_class.items():
+            self.log(f'AP for class {label}', average_precision)
+            self.log(f'Number of annotations for class {label}', num_annotations)
+
+    def _restructure_validation_outputs(self, outputs: List[Tuple[List[MetadataDict], List[MetadataDict]]]) -> Tuple[np.ndarray, np.ndarray]:
         overall_predictions = []
         overall_targets = []
         for batch_indices, batch_predictions, batch_targets in outputs:
