@@ -38,7 +38,7 @@ class Experiment(LightningModule):
 
     def training_step(self, batch: TrainBatch, batch_idx: int) -> torch.Tensor:
         loss_dict = self(batch)
-        loss = torch.sum(loss_dict.values())
+        loss = sum(loss_dict.values())
         return loss
 
     def validation_step(self, batch: TrainBatch, batch_idx: int) -> Tuple[List[Dict[str, torch.Tensor]], List[Dict[str, torch.Tensor]]]:
