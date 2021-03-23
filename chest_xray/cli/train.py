@@ -33,7 +33,7 @@ def run() -> None:
         print(OmegaConf.to_yaml(config, resolve=True))
 
     checkpoints = ModelCheckpoint(monitor='mAP', filename='{epoch}_{mAP:.3f}', save_top_k=5, mode='max')
-    trainer = Trainer.from_argparse_args(args, callbalcks=[checkpoints, LearningRateMonitor()])
+    trainer = Trainer.from_argparse_args(args, callbacks=[checkpoints, LearningRateMonitor()])
     data = XRayDataModule(config.data)
     model = instantiate_model(config.model.num_classes, config.model.trainable_backbone_layers)
     experiment = Experiment(model, config)
