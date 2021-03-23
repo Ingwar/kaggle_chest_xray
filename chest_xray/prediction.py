@@ -17,9 +17,9 @@ NO_FINDING_TARGET_STRING = '14 1.0 0 0 1 1'
 @dataclass(frozen=True)
 class Prediction:
     image_id: str
-    box: np.ndarray
-    label: int
-    score: float
+    boxes: np.ndarray
+    labels: np.ndarray
+    scores: np.ndarray
 
 
 def parse_predictions(predictions: List[Tuple[np.ndarray, List[Dict[str, np.ndarray]]]], image_ids: List[str]) -> Iterable[Prediction]:
@@ -30,8 +30,7 @@ def parse_predictions(predictions: List[Tuple[np.ndarray, List[Dict[str, np.ndar
             labels = prediction['labels']
             scores = prediction['scores']
             image_id = image_ids[index]
-            for box, label, score in zip(boxes, labels, scores):
-                yield Prediction(image_id, box, label, score)
+            yield Prediction(image_id, boxes, labels, scores)
 
 
 def generate_submission_file(path: Union[Path, str], predictions: Iterable[Prediction]) -> None:
@@ -42,5 +41,8 @@ def generate_submission_file(path: Union[Path, str], predictions: Iterable[Predi
         writer = DictWriter(csv_file, fieldnames=[id_column, prediction_column])
         writer.writeheader()
         for p in predictions:
-            target_string = f'{p.label - 1} {p.score} {p.box[0]} {p.box[1]} {p.box[2]} {p.box[3]}'
+            target_strings = []
+            for box, label, score in zip(p.boxes, p.labels, p.scores):
+                target_strings.append(f'{label - 1} {score} {box[0]} {box[1]} {box[2]} {box[3]}')
+            target_string = ' '.join(target_strings)
             writer.writerow({id_column: p.image_id, prediction_column: target_string})
