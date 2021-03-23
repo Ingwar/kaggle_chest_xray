@@ -10,9 +10,9 @@ from albumentations import BasicTransform, Compose
 from pydicom.pixel_data_handlers import apply_voi_lut
 from torch.utils.data import Dataset
 
-
 __all__ = [
     'XRayAnomalyDataset',
+    'XRayAnomalyValidationDataset',
     'InferenceDicomDataset',
 ]
 
@@ -30,11 +30,8 @@ class XRayAnomalyDataset(Dataset):
         metadata = pd.read_csv(metadata_file)
         if ignore_images_without_objects:
             metadata = metadata[metadata['class_id'] != background_class]
-            image_ids = pd.unique(metadata['image_id'])
-            file_list = [data_dir / f'{image_id}.dicom' for image_id in image_ids]
-        else:
-            file_list = list(data_dir.glob('*.dicom'))
-        self.file_list = file_list
+        self.image_ids = pd.unique(metadata['image_id'])
+        self.file_list = [data_dir / f'{image_id}.dicom' for image_id in self.image_ids]
         self.metadata = metadata
         self.transform = transform
         self.background_class = background_class
@@ -46,7 +43,7 @@ class XRayAnomalyDataset(Dataset):
         boxes = []
         labels = []
         for row in image_metadata[image_metadata['class_id'] != self.background_class].itertuples(index=False):
-            labels.append(row.class_id)
+            labels.append(row.class_id + 1)  # Torchvision expects that 0 is a background class
             boxes.append([row.x_min, row.y_min, row.x_max, row.y_max])
         labels = np.array(labels)
         boxes = np.array(boxes)
@@ -63,6 +60,12 @@ class XRayAnomalyDataset(Dataset):
         return len(self.file_list)
 
 
+class XRayAnomalyValidationDataset(XRayAnomalyDataset):
+
+    def __getitem__(self, index: int) -> Tuple[int, Dict[str, torch.Tensor]]:
+        return index, super().__getitem__(index)
+
+
 class InferenceDicomDataset(Dataset):
 
     def __init__(self, image_dir: Path, transform: Optional[Union[Compose, BasicTransform]] = None) -> None:
@@ -74,7 +77,7 @@ class InferenceDicomDataset(Dataset):
         image_file = self.file_list[index]
         image = read_xray(image_file)
         if self.transform is not None:
-            image = self.transform(image=image)
+            image = self.transform(image=image)['image']
         return index, image
 
     def __len__(self) -> int:

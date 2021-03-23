@@ -7,7 +7,7 @@ import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
-from .dataset import InferenceDicomDataset, XRayAnomalyDataset
+from .dataset import InferenceDicomDataset, XRayAnomalyDataset, XRayAnomalyValidationDataset
 from .transforms import test_transform, train_transform
 from ..conf.data import DataConfig
 
@@ -29,24 +29,24 @@ class XRayDataModule(LightningDataModule):
         self.train_metadata = Path(data_config.train.metadata)
         self.validation_data_dir = Path(data_config.validation.data_dir)
         self.validation_metadata = Path(data_config.validation.metadata)
-        self.test_data_dir = Path(data_config.test.data_dir)
-        self.train_dataset = None
-        self.validation_dataset = None
-        self.test_dataset = None
+        self.predict_data_dir = Path(data_config.predict.data_dir)
+        self.train_dataset: XRayAnomalyDataset = None
+        self.validation_dataset: XRayAnomalyValidationDataset = None
+        self.predict_dataset: InferenceDicomDataset = None
 
     def prepare_data(self, *args, **kwargs) -> None:
         os.system(f'dvc pull {os.fspath(self.train_data_dir)}')
-        os.system(f'dvc pull {os.fspath(self.test_data_dir)}')
+        os.system(f'dvc pull {os.fspath(self.predict_data_dir)}')
 
     def setup(self, stage: Optional[str] = None) -> None:
         self.train_dataset = XRayAnomalyDataset(self.train_data_dir, self.train_metadata, self.train_transforms)
-        self.validation_dataset = XRayAnomalyDataset(
+        self.validation_dataset = XRayAnomalyValidationDataset(
             self.validation_data_dir,
             self.validation_metadata,
             self.val_transforms,
             ignore_images_without_objects=False,  # TODO: Check me
         )
-        self.test_dataset = InferenceDicomDataset(self.test_data_dir, self.test_transforms)
+        self.predict_dataset = InferenceDicomDataset(self.predict_data_dir, self.test_transforms)
 
     def train_dataloader(self) -> DataLoader:
         return DataLoader(
@@ -64,14 +64,14 @@ class XRayDataModule(LightningDataModule):
             batch_size=self.config.validation.loader.batch_size,
             num_workers=self.config.validation.loader.num_workers,
             pin_memory=True,
-            collate_fn=train_collate_fn
+            collate_fn=validation_collate_fn
         )
 
-    def test_dataloader(self) -> DataLoader:
+    def predict_dataloader(self) -> DataLoader:
         return DataLoader(
-            self.test_dataset,
-            batch_size=self.config.test.loader.batch_size,
-            num_workers=self.config.test.loader.num_workers,
+            self.predict_dataset,
+            batch_size=self.config.predict.loader.batch_size,
+            num_workers=self.config.predict.loader.num_workers,
             pin_memory=True,
             collate_fn=test_collate_fn
         )
@@ -95,6 +95,21 @@ def train_collate_fn(
             target[key] = value
         targets.append(target)
     return images, targets
+
+
+def validation_collate_fn(
+    batch: List[Dict[str, Union[np.array, float]]],
+    image_field: str = 'image',
+    boxes_field: str = 'boxes'
+) -> Tuple[torch.Tensor, List[torch.Tensor], List[Dict[str, torch.Tensor]]]:
+    indices = []
+    examples = []
+    for index,  example in batch:
+        indices.append(index)
+        examples.append(example)
+    indices = torch.tensor(indices)
+    images, targets = train_collate_fn(examples, image_field, boxes_field)
+    return indices, images, targets
 
 
 def test_collate_fn(batch: List[Tuple[int, torch.Tensor]]) -> Tuple[torch.Tensor, List[torch.Tensor]]:
