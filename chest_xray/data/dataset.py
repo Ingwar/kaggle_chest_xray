@@ -46,7 +46,7 @@ class XRayAnomalyDataset(Dataset):
         boxes = []
         labels = []
         for row in image_metadata[image_metadata['class_id'] != self.background_class].itertuples(index=False):
-            labels.append(row.class_id)
+            labels.append(row.class_id + 1)  # Torchvision expects that 0 is a background class
             boxes.append([row.x_min, row.y_min, row.x_max, row.y_max])
         labels = np.array(labels)
         boxes = np.array(boxes)
