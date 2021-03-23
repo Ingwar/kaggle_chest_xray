@@ -36,9 +36,11 @@ def parse_predictions(predictions: List[Tuple[np.ndarray, List[Dict[str, np.ndar
 
 def generate_submission_file(path: Union[Path, str], predictions: Iterable[Prediction]) -> None:
     # TODO: Add threshold filtration
+    id_column = 'image_id'
+    prediction_column = 'PredictionString'
     with open(path, 'w') as csv_file:
-        writer = DictWriter(csv_file, fieldnames=['ID', 'TARGET'])
+        writer = DictWriter(csv_file, fieldnames=[id_column, prediction_column])
         writer.writeheader()
         for p in predictions:
             target_string = f'{p.label - 1} {p.score} {p.box[0]} {p.box[1]} {p.box[2]} {p.box[3]}'
-            writer.writerow({'ID': p.image_id, 'TARGET': target_string})
+            writer.writerow({id_column: p.image_id, prediction_column: target_string})
