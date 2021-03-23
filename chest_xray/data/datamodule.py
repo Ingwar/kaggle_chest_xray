@@ -30,9 +30,9 @@ class XRayDataModule(LightningDataModule):
         self.validation_data_dir = Path(data_config.validation.data_dir)
         self.validation_metadata = Path(data_config.validation.metadata)
         self.predict_data_dir = Path(data_config.predict.data_dir)
-        self.train_dataset = None
-        self.validation_dataset = None
-        self.predict_dataset = None
+        self.train_dataset: XRayAnomalyDataset = None
+        self.validation_dataset: XRayAnomalyDataset = None
+        self.predict_dataset: InferenceDicomDataset = None
 
     def prepare_data(self, *args, **kwargs) -> None:
         os.system(f'dvc pull {os.fspath(self.train_data_dir)}')

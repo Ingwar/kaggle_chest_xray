@@ -17,8 +17,15 @@ class ModelConfig:
 
 
 @dataclass
+class SubmissionConfig:
+    file: str = MISSING
+
+
+
+@dataclass
 class PipelineConfig:
     data: DataConfig = DataConfig()
     model: ModelConfig = ModelConfig()
     optimizer: Dict[str, Any] = MISSING
+    submission: SubmissionConfig = SubmissionConfig()
 

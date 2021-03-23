@@ -4,10 +4,11 @@ from pathlib import Path
 from omegaconf import OmegaConf
 from pytorch_lightning import Trainer
 
+from .hydra import init_hydra, parse_hydra_config
 from ..data.datamodule import XRayDataModule
 from ..model import instantiate_model
 from ..model.experiment import Experiment
-from .hydra import init_hydra, parse_hydra_config
+from ..prediction import generate_submission_file, parse_predictions
 
 
 def run() -> None:
@@ -31,6 +32,9 @@ def run() -> None:
     model = instantiate_model(config.model.num_classes, config.model.trainable_backbone_layers)
     experiment = Experiment(model, config)
     trainer.fit(experiment, datamodule=data)
+    predictions = trainer.predict(experiment, datamodule=data)
+    parsed_predictions = parse_predictions(predictions, data.predict_dataset.image_ids)
+    generate_submission_file(config.submission.file, parsed_predictions)
 
 
 if __name__ == '__main__':

@@ -30,3 +30,6 @@ model:
 optimizer:
   _target_: torch.optim.adamw.AdamW
   lr: 1e-3
+
+submission:
+  file: submission.csv
