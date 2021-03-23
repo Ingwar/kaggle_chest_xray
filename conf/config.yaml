@@ -24,7 +24,7 @@ data:
     num_workers: 48
 
 model:
-  num_classes: 14
+  num_classes: 15
 
 optimizer:
   _target_: torch.optim.adamw.AdamW
