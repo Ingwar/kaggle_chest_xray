@@ -25,6 +25,7 @@ data:
 
 model:
   num_classes: 15
+  trainable_backbone_layers: 3
 
 optimizer:
   _target_: torch.optim.adamw.AdamW
