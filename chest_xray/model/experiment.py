@@ -6,7 +6,7 @@ from pytorch_lightning import LightningModule
 from torch import nn
 from torch.optim import Optimizer
 
-from chest_xray.conf import PipelineConfig
+from ..conf import PipelineConfig
 
 __all__ = [
     'Experiment',
