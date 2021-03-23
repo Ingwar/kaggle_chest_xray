@@ -30,10 +30,8 @@ class XRayAnomalyDataset(Dataset):
         metadata = pd.read_csv(metadata_file)
         if ignore_images_without_objects:
             metadata = metadata[metadata['class_id'] != background_class]
-            image_ids = pd.unique(metadata['image_id'])
-            file_list = [data_dir / f'{image_id}.dicom' for image_id in image_ids]
-        else:
-            file_list = list(data_dir.glob('*.dicom'))
+        image_ids = pd.unique(metadata['image_id'])
+        file_list = [data_dir / f'{image_id}.dicom' for image_id in image_ids]
         self.file_list = file_list
         self.metadata = metadata
         self.transform = transform
