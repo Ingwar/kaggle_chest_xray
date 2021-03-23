@@ -1,3 +1,4 @@
+import warnings
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from pathlib import Path
 
@@ -19,6 +20,8 @@ def run() -> None:
     parser.add_argument('--config-file-name', default='config.yaml')
     parser.add_argument('--print-final-config', action='store_true')
     parser.add_argument('overrides', nargs='*')
+    # Silence pydicom warning
+    warnings.filterwarnings('ignore', category=UserWarning, module='pydicom.pixel_data_handlers.pillow_handler')
 
     args = parser.parse_args()
     init_hydra(args.config_dir)
