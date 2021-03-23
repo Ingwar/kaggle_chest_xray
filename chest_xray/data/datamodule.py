@@ -32,7 +32,7 @@ class XRayDataModule(LightningDataModule):
         self.test_data_dir = Path(data_config.test.data_dir)
         self.train_dataset = None
         self.validation_dataset = None
-        self.test_dataset = None
+        self.predict_dataset = None
 
     def prepare_data(self, *args, **kwargs) -> None:
         os.system(f'dvc pull {os.fspath(self.train_data_dir)}')
@@ -46,7 +46,7 @@ class XRayDataModule(LightningDataModule):
             self.val_transforms,
             ignore_images_without_objects=False,  # TODO: Check me
         )
-        self.test_dataset = InferenceDicomDataset(self.test_data_dir, self.test_transforms)
+        self.predict_dataset = InferenceDicomDataset(self.test_data_dir, self.test_transforms)
 
     def train_dataloader(self) -> DataLoader:
         return DataLoader(
@@ -67,9 +67,9 @@ class XRayDataModule(LightningDataModule):
             collate_fn=train_collate_fn
         )
 
-    def test_dataloader(self) -> DataLoader:
+    def predict_dataloader(self) -> DataLoader:
         return DataLoader(
-            self.test_dataset,
+            self.predict_dataset,
             batch_size=self.config.test.loader.batch_size,
             num_workers=self.config.test.loader.num_workers,
             pin_memory=True,
