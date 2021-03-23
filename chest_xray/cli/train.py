@@ -28,7 +28,7 @@ def run() -> None:
 
     trainer = Trainer.from_argparse_args(args)
     data = XRayDataModule(config.data)
-    model = instantiate_model(config.model.num_classes)
+    model = instantiate_model(config.model.num_classes, config.model.trainable_backbone_layers)
     experiment = Experiment(model, config)
     trainer.fit(experiment, datamodule=data)
 
