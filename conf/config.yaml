@@ -33,3 +33,7 @@ optimizer:
 
 submission:
   file: submission.csv
+
+evaluation:
+  iou_threshold: 0.4
+  confidence_threshold: 0.02

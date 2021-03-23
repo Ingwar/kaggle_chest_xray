@@ -21,6 +21,11 @@ class SubmissionConfig:
     file: str = MISSING
 
 
+@dataclass
+class EvaluationConfig:
+    iou_threshold: float = MISSING
+    confidence_threshold: float = MISSING
+
 
 @dataclass
 class PipelineConfig:
@@ -28,4 +33,5 @@ class PipelineConfig:
     model: ModelConfig = ModelConfig()
     optimizer: Dict[str, Any] = MISSING
     submission: SubmissionConfig = SubmissionConfig()
+    evaluation: EvaluationConfig = EvaluationConfig()
 

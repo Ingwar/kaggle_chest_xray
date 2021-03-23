@@ -37,7 +37,7 @@ def run() -> None:
     trainer.fit(experiment, datamodule=data)
     predictions = trainer.predict(experiment, datamodule=data)
     parsed_predictions = parse_predictions(predictions, data.predict_dataset.image_ids)
-    generate_submission_file(config.submission.file, parsed_predictions)
+    generate_submission_file(config.submission.file, parsed_predictions, config.evaluation.confidence_threshold)
 
 
 if __name__ == '__main__':
