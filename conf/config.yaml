@@ -14,11 +14,18 @@ data:
     loader:
       batch_size: ${data.default_loader.batch_size}
       num_workers: ${data.default_loader.num_workers}
-  test:
+  predict:
     data_dir: data/test
     loader:
       batch_size: ${data.default_loader.batch_size}
       num_workers: ${data.default_loader.num_workers}
-    default_loader:
-      batch_size: 12
-      num_workers: 48
+  default_loader:
+    batch_size: 12
+    num_workers: 48
+
+model:
+  num_classes: 14
+
+optimizer:
+  _target_: torch.optim.adamw.AdamW
+  lr: 1e-3

@@ -21,6 +21,7 @@ kaggle = "^1.5.12"
 
 [tool.poetry.scripts]
 split-train-val = 'chest_xray.cli.split_train_val:main'
+train = 'chest_xray.cli.train:run'
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

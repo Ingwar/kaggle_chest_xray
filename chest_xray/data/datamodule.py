@@ -29,14 +29,14 @@ class XRayDataModule(LightningDataModule):
         self.train_metadata = Path(data_config.train.metadata)
         self.validation_data_dir = Path(data_config.validation.data_dir)
         self.validation_metadata = Path(data_config.validation.metadata)
-        self.test_data_dir = Path(data_config.test.data_dir)
+        self.predict_data_dir = Path(data_config.predict.data_dir)
         self.train_dataset = None
         self.validation_dataset = None
         self.predict_dataset = None
 
     def prepare_data(self, *args, **kwargs) -> None:
         os.system(f'dvc pull {os.fspath(self.train_data_dir)}')
-        os.system(f'dvc pull {os.fspath(self.test_data_dir)}')
+        os.system(f'dvc pull {os.fspath(self.predict_data_dir)}')
 
     def setup(self, stage: Optional[str] = None) -> None:
         self.train_dataset = XRayAnomalyDataset(self.train_data_dir, self.train_metadata, self.train_transforms)
@@ -46,7 +46,7 @@ class XRayDataModule(LightningDataModule):
             self.val_transforms,
             ignore_images_without_objects=False,  # TODO: Check me
         )
-        self.predict_dataset = InferenceDicomDataset(self.test_data_dir, self.test_transforms)
+        self.predict_dataset = InferenceDicomDataset(self.predict_data_dir, self.test_transforms)
 
     def train_dataloader(self) -> DataLoader:
         return DataLoader(
@@ -70,8 +70,8 @@ class XRayDataModule(LightningDataModule):
     def predict_dataloader(self) -> DataLoader:
         return DataLoader(
             self.predict_dataset,
-            batch_size=self.config.test.loader.batch_size,
-            num_workers=self.config.test.loader.num_workers,
+            batch_size=self.config.predict.loader.batch_size,
+            num_workers=self.config.predict.loader.num_workers,
             pin_memory=True,
             collate_fn=test_collate_fn
         )

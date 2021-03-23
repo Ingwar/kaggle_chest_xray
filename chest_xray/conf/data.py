@@ -35,7 +35,7 @@ class ValidationDataConfig:
 
 
 @dataclass
-class TestDataConfig:
+class PredictDataConfig:
     data_dir: str = MISSING
     loader: DataLoadingConfig = DataLoadingConfig()
 
@@ -44,6 +44,6 @@ class TestDataConfig:
 class DataConfig:
     train: TrainDataConfig = TrainDataConfig()
     validation: ValidationDataConfig = ValidationDataConfig()
-    test: TestDataConfig = TestDataConfig()
-    default_loader = DataLoadingConfig()
+    predict: PredictDataConfig = PredictDataConfig()
+    default_loader: DataLoadingConfig = DataLoadingConfig()
 
