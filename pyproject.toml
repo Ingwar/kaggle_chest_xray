@@ -15,6 +15,7 @@ pandas = "^1.2.3"
 pydicom = "^2.1.2"
 hydra-core = "^1.0.6"
 scikit-learn = "^0.24.1"
+map-boxes = "^1.0.5"
 
 [tool.poetry.dev-dependencies]
 kaggle = "^1.5.12"

@@ -7,7 +7,7 @@ import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
-from .dataset import InferenceDicomDataset, XRayAnomalyDataset
+from .dataset import InferenceDicomDataset, XRayAnomalyDataset, XRayAnomalyValidationDataset
 from .transforms import test_transform, train_transform
 from ..conf.data import DataConfig
 
@@ -31,7 +31,7 @@ class XRayDataModule(LightningDataModule):
         self.validation_metadata = Path(data_config.validation.metadata)
         self.predict_data_dir = Path(data_config.predict.data_dir)
         self.train_dataset: XRayAnomalyDataset = None
-        self.validation_dataset: XRayAnomalyDataset = None
+        self.validation_dataset: XRayAnomalyValidationDataset = None
         self.predict_dataset: InferenceDicomDataset = None
 
     def prepare_data(self, *args, **kwargs) -> None:
@@ -40,7 +40,7 @@ class XRayDataModule(LightningDataModule):
 
     def setup(self, stage: Optional[str] = None) -> None:
         self.train_dataset = XRayAnomalyDataset(self.train_data_dir, self.train_metadata, self.train_transforms)
-        self.validation_dataset = XRayAnomalyDataset(
+        self.validation_dataset = XRayAnomalyValidationDataset(
             self.validation_data_dir,
             self.validation_metadata,
             self.val_transforms,
@@ -64,7 +64,7 @@ class XRayDataModule(LightningDataModule):
             batch_size=self.config.validation.loader.batch_size,
             num_workers=self.config.validation.loader.num_workers,
             pin_memory=True,
-            collate_fn=train_collate_fn
+            collate_fn=validation_collate_fn
         )
 
     def predict_dataloader(self) -> DataLoader:
@@ -95,6 +95,21 @@ def train_collate_fn(
             target[key] = value
         targets.append(target)
     return images, targets
+
+
+def validation_collate_fn(
+    batch: List[Dict[str, Union[np.array, float]]],
+    image_field: str = 'image',
+    boxes_field: str = 'boxes'
+) -> Tuple[torch.Tensor, List[torch.Tensor], List[Dict[str, torch.Tensor]]]:
+    indices = []
+    examples = []
+    for index,  example in batch:
+        indices.append(index)
+        examples.append(example)
+    indices = torch.tensor(indices)
+    images, targets = train_collate_fn(examples, image_field, boxes_field)
+    return indices, images, targets
 
 
 def test_collate_fn(batch: List[Tuple[int, torch.Tensor]]) -> Tuple[torch.Tensor, List[torch.Tensor]]:

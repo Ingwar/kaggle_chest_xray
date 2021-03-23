@@ -10,9 +10,9 @@ from albumentations import BasicTransform, Compose
 from pydicom.pixel_data_handlers import apply_voi_lut
 from torch.utils.data import Dataset
 
-
 __all__ = [
     'XRayAnomalyDataset',
+    'XRayAnomalyValidationDataset',
     'InferenceDicomDataset',
 ]
 
@@ -30,9 +30,8 @@ class XRayAnomalyDataset(Dataset):
         metadata = pd.read_csv(metadata_file)
         if ignore_images_without_objects:
             metadata = metadata[metadata['class_id'] != background_class]
-        image_ids = pd.unique(metadata['image_id'])
-        file_list = [data_dir / f'{image_id}.dicom' for image_id in image_ids]
-        self.file_list = file_list
+        self.image_ids = pd.unique(metadata['image_id'])
+        self.file_list = [data_dir / f'{image_id}.dicom' for image_id in self.image_ids]
         self.metadata = metadata
         self.transform = transform
         self.background_class = background_class
@@ -59,6 +58,12 @@ class XRayAnomalyDataset(Dataset):
 
     def __len__(self) -> int:
         return len(self.file_list)
+
+
+class XRayAnomalyValidationDataset(XRayAnomalyDataset):
+
+    def __getitem__(self, index: int) -> Tuple[int, Dict[str, torch.Tensor]]:
+        return index, super().__getitem__(index)
 
 
 class InferenceDicomDataset(Dataset):
