@@ -1,9 +1,10 @@
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import torch
 from hydra.utils import instantiate
 from map_boxes import mean_average_precision_for_boxes
+from omegaconf import OmegaConf
 from pytorch_lightning import LightningModule
 from torch.optim import Optimizer
 
@@ -84,8 +85,15 @@ class Experiment(LightningModule):
         predictions = self(images)
         return indices, predictions
 
-    def configure_optimizers(self) -> Optimizer:
-        return instantiate(self.conf.optimizer, self.parameters())
+    def configure_optimizers(self) -> Tuple[List[Optimizer], List[Dict[str, Any]]]:
+        optimizer = instantiate(self.conf.optimizer, self.parameters())
+        schedulers = []
+        for scheduler_conf in self.conf.schedulers:
+            scheduler_conf = OmegaConf.to_container(scheduler_conf, resolve=True)
+            scheduler = instantiate(scheduler_conf['scheduler'], optimizer)
+            scheduler_conf['scheduler'] = scheduler
+            schedulers.append(scheduler_conf)
+        return [optimizer], schedulers
 
     def log_ap_per_class(self, ap_per_class: Dict[str, Tuple[float, float]]) -> None:
         for label, (average_precision, num_annotations) in ap_per_class.items():

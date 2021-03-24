@@ -1,5 +1,6 @@
 defaults:
-  - optimizer: adamw
+  - optimizer: sgd
+  - schedulers: cosine_annealing_with_warmup
 
 data:
   train:

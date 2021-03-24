@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Any, Dict
+from dataclasses import dataclass, field
+from typing import Any, Dict, List
 
 from omegaconf import MISSING
 
@@ -8,6 +8,8 @@ from .data import DataConfig
 __all__ = [
     'PipelineConfig',
 ]
+
+from .scheduler import SchedulerConf
 
 
 @dataclass
@@ -33,6 +35,6 @@ class PipelineConfig:
     data: DataConfig = DataConfig()
     model: ModelConfig = ModelConfig()
     optimizer: Dict[str, Any] = MISSING
+    schedulers: List[SchedulerConf] = field(default_factory=list)
     submission: SubmissionConfig = SubmissionConfig()
     evaluation: EvaluationConfig = EvaluationConfig()
-
