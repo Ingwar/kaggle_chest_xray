@@ -12,6 +12,6 @@ def instantiate_model(backbone_name: str, num_classes: int, trainable_backbone_l
         backbone_name,
         pretrained=True,
         trainable_layers=trainable_backbone_layers,
-        # norm_layer=nn.BatchNorm2d,
+        norm_layer=nn.BatchNorm2d,
     )
     return FasterRCNN(backbone, num_classes)
