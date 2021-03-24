@@ -11,7 +11,7 @@ from typing import cast
 
 from hydra.core.config_store import ConfigStore
 from hydra.experimental import compose, initialize
-from omegaconf import DictConfig
+from omegaconf import OmegaConf
 
 from ..conf import PipelineConfig
 
@@ -25,4 +25,8 @@ def init_hydra(config_dir: Path) -> None:
 
 
 def parse_hydra_config(args: Namespace) -> PipelineConfig:
-    return cast(PipelineConfig, compose(args.config_file_name, args.overrides))
+    init_hydra(args.config_dir)
+    config = cast(PipelineConfig, compose(args.config_file_name, args.overrides))
+    if args.print_final_config:
+        print(OmegaConf.to_yaml(config, resolve=True))
+    return config

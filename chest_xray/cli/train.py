@@ -2,16 +2,14 @@ import warnings
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from pathlib import Path
 
-from omegaconf import OmegaConf
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from pytorch_lightning.utilities import rank_zero_only
 
-from .hydra import init_hydra, parse_hydra_config
+from .hydra import parse_hydra_config
 from ..data.datamodule import XRayDataModule
 from ..model import instantiate_model
 from ..model.experiment import Experiment
-from ..prediction import generate_submission_file, parse_predictions
 
 
 def run() -> None:
@@ -26,11 +24,7 @@ def run() -> None:
     warnings.filterwarnings('ignore', category=UserWarning, module='pydicom.pixel_data_handlers.pillow_handler')
 
     args = parser.parse_args()
-    init_hydra(args.config_dir)
     config = parse_hydra_config(args)
-
-    if args.print_final_config:
-        print(OmegaConf.to_yaml(config, resolve=True))
 
     checkpoints = ModelCheckpoint(monitor='mAP', filename='{epoch}_{mAP:.3f}', save_top_k=5, mode='max')
     trainer = Trainer.from_argparse_args(args, callbacks=[checkpoints, LearningRateMonitor()])
