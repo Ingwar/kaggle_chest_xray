@@ -1,0 +1,3 @@
+# @package _group_
+_target_: torch.optim.adamw.AdamW
+lr: 1e-3

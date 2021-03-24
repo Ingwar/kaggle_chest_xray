@@ -1,3 +1,6 @@
+defaults:
+  - optimizer: adamw
+
 data:
   train:
     data_dir: data/train
@@ -27,10 +30,6 @@ model:
   backbone: resnet50
   trainable_backbone_layers: 3
   num_classes: 15
-
-optimizer:
-  _target_: torch.optim.adamw.AdamW
-  lr: 1e-3
 
 submission:
   file: submission.csv
