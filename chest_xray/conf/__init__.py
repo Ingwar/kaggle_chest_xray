@@ -12,6 +12,7 @@ __all__ = [
 
 @dataclass
 class ModelConfig:
+    backbone: str = MISSING
     num_classes: int = MISSING
     trainable_backbone_layers: int = MISSING
 

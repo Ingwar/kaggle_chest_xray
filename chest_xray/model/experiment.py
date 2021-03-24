@@ -5,9 +5,9 @@ import torch
 from hydra.utils import instantiate
 from map_boxes import mean_average_precision_for_boxes
 from pytorch_lightning import LightningModule
-from torch import nn
 from torch.optim import Optimizer
 
+from . import instantiate_model
 from ..conf import PipelineConfig
 
 __all__ = [
@@ -29,9 +29,13 @@ EMPTY_BOX = [0, 0, 1, 1]
 
 class Experiment(LightningModule):
 
-    def __init__(self, model: nn.Module, conf: PipelineConfig) -> None:
+    def __init__(self, conf: PipelineConfig) -> None:
         super().__init__()
-        self.model = model
+        self.model = instantiate_model(
+            conf.model.backbone,
+            conf.model.num_classes,
+            conf.model.trainable_backbone_layers
+        )
         self.conf = conf
         self.save_hyperparameters(conf)
 

@@ -24,8 +24,9 @@ data:
     num_workers: 48
 
 model:
-  num_classes: 15
+  backbone: resnet50
   trainable_backbone_layers: 3
+  num_classes: 15
 
 optimizer:
   _target_: torch.optim.adamw.AdamW

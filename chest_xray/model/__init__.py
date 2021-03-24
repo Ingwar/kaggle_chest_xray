@@ -1,14 +1,17 @@
-import torchvision
-from torch import nn
+from torchvision.models.detection import FasterRCNN
+from torchvision.models.detection.backbone_utils import resnet_fpn_backbone
 
 __all__ = [
     'instantiate_model',
 ]
 
 
-def instantiate_model(num_classes: int, trainable_backbone_layers: int) -> nn.Module:
+def instantiate_model(backbone_name: str, num_classes: int, trainable_backbone_layers: int) -> FasterRCNN:
     # TODO: make configurable
-    return torchvision.models.detection.fasterrcnn_resnet50_fpn(
-        num_classes=num_classes,
-        trainable_backbone_layers=trainable_backbone_layers
+    backbone = resnet_fpn_backbone(
+        backbone_name,
+        pretrained=True,
+        trainable_layers=trainable_backbone_layers,
+        # norm_layer=nn.BatchNorm2d,
     )
+    return FasterRCNN(backbone, num_classes)
