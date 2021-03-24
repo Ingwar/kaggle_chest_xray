@@ -16,7 +16,7 @@ def run() -> None:
 
     silence_pydicom_warnings()
 
-    checkpoints = ModelCheckpoint(monitor='mAP', filename='{epoch}_{mAP:.3f}', save_top_k=5, mode='max')
+    checkpoints = ModelCheckpoint(monitor='mAP', filename='{epoch}_{mAP:.3f}', save_top_k=5, mode='max', save_last=True)
     trainer = Trainer.from_argparse_args(args, callbacks=[checkpoints, LearningRateMonitor()])
     data = XRayDataModule(config.data)
     experiment = Experiment(config)
