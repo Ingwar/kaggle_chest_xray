@@ -67,6 +67,10 @@ class XRayDataModule(LightningDataModule):
             collate_fn=validation_collate_fn
         )
 
+    def test_dataloader(self) -> DataLoader:
+        # It's a work around the fact that currently I can't compute mAP in DDP mode
+        return self.val_dataloader()
+
     def predict_dataloader(self) -> DataLoader:
         return DataLoader(
             self.predict_dataset,

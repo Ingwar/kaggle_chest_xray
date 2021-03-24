@@ -61,6 +61,9 @@ class Experiment(LightningModule):
         predictions = self(images)
         return indices, predictions, targets
 
+    def test_step(self, batch: ValidationBatch, batch_idx: int) -> Tuple[torch.Tensor, List[MetadataDict], List[MetadataDict]]:
+        return self.validation_step(batch, batch_idx)
+
     def validation_epoch_end(self, outputs: List[Tuple[List[MetadataDict], List[MetadataDict]]]) -> None:
         predictions, targets = self._restructure_validation_outputs(outputs)
         mAP, ap_per_class = mean_average_precision_for_boxes(
@@ -72,6 +75,9 @@ class Experiment(LightningModule):
         # TODO: Add DDP support
         self.log('mAP', mAP, prog_bar=True)
         self.log_ap_per_class(ap_per_class)
+
+    def test_epoch_end(self, outputs: List[Tuple[List[MetadataDict], List[MetadataDict]]]) -> None:
+        return self.validation_epoch_end(outputs)
 
     def predict(self, batch: InferenceBatch, batch_idx: int, dataloader_idx: Optional[int] = None) -> Tuple[torch.Tensor, BatchPredictions]:
         indices, images = batch
