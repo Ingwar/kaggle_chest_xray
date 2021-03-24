@@ -36,4 +36,4 @@ submission:
 
 evaluation:
   iou_threshold: 0.4
-  confidence_threshold: 0.02
+  confidence_threshold: 0.2
