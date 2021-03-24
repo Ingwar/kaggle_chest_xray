@@ -1,30 +1,21 @@
-import warnings
-from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
-from pathlib import Path
-
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from pytorch_lightning.utilities import rank_zero_only
 
+from .args import setup_common_cli_parser
 from .hydra import parse_hydra_config
 from ..data.datamodule import XRayDataModule
 from ..model import instantiate_model
 from ..model.experiment import Experiment
+from ..utils import silence_pydicom_warnings
 
 
 def run() -> None:
-    parser = ArgumentParser()
-    parser = Trainer.add_argparse_args(parser)
-    parser.formatter_class = ArgumentDefaultsHelpFormatter
-    parser.add_argument('--config-dir', type=Path, default=Path('conf'))
-    parser.add_argument('--config-file-name', default='config.yaml')
-    parser.add_argument('--print-final-config', action='store_true')
-    parser.add_argument('overrides', nargs='*')
-    # Silence pydicom warning
-    warnings.filterwarnings('ignore', category=UserWarning, module='pydicom.pixel_data_handlers.pillow_handler')
-
+    parser = setup_common_cli_parser()
     args = parser.parse_args()
     config = parse_hydra_config(args)
+
+    silence_pydicom_warnings()
 
     checkpoints = ModelCheckpoint(monitor='mAP', filename='{epoch}_{mAP:.3f}', save_top_k=5, mode='max')
     trainer = Trainer.from_argparse_args(args, callbacks=[checkpoints, LearningRateMonitor()])

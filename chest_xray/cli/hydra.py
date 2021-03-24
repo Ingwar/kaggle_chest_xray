@@ -2,11 +2,6 @@ import os
 from argparse import Namespace
 from pathlib import Path
 
-__all__ = [
-    'init_hydra',
-    'parse_hydra_config',
-]
-
 from typing import cast
 
 from hydra.core.config_store import ConfigStore
@@ -14,6 +9,11 @@ from hydra.experimental import compose, initialize
 from omegaconf import OmegaConf
 
 from ..conf import PipelineConfig
+
+__all__ = [
+    'init_hydra',
+    'parse_hydra_config',
+]
 
 
 def init_hydra(config_dir: Path) -> None:
