@@ -22,9 +22,6 @@ def run() -> None:
     experiment = Experiment(config)
     trainer.fit(experiment, datamodule=data)
     report_checkpoints(checkpoints)
-    predictions = trainer.predict(experiment, datamodule=data)
-    parsed_predictions = parse_predictions(predictions, data.predict_dataset.image_ids)
-    generate_submission_file(config.submission.file, parsed_predictions, config.evaluation.confidence_threshold)
 
 
 @rank_zero_only
