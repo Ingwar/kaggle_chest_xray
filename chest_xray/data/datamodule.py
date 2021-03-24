@@ -8,7 +8,7 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
 from .dataset import InferenceDicomDataset, XRayAnomalyDataset, XRayAnomalyValidationDataset
-from .transforms import test_transform, train_transform
+from .transforms import test_transform, train_aggressive_transform, train_transform
 from ..conf.data import DataConfig
 
 __all__ = [
@@ -19,8 +19,12 @@ __all__ = [
 class XRayDataModule(LightningDataModule):
 
     def __init__(self, data_config: DataConfig) -> None:
+        if data_config.train.augment:
+            train_time_transform = train_aggressive_transform(data_config.train.crop.width, data_config.train.crop.height)
+        else:
+            train_time_transform = train_transform(data_config.train.crop.width, data_config.train.crop.height)
         super().__init__(
-            train_transforms=train_transform(data_config.train.crop.width, data_config.train.crop.height),
+            train_transforms=train_time_transform,
             val_transforms=test_transform(),
             test_transforms=test_transform()
         )

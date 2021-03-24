@@ -24,6 +24,7 @@ class TrainDataConfig:
     data_dir: str = MISSING
     metadata: str = MISSING
     crop: CropInfo = CropInfo()
+    augment: bool = MISSING
     loader: DataLoadingConfig = DataLoadingConfig()
 
 
