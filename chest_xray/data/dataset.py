@@ -1,4 +1,5 @@
 import os
+from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from typing import AnyStr, BinaryIO, Dict, Optional, Tuple, Union
 
@@ -14,7 +15,9 @@ from torchvision.datasets.folder import pil_loader
 __all__ = [
     'XRayAnomalyDataset',
     'XRayAnomalyValidationDataset',
+    'InferenceDataset',
     'InferenceDicomDataset',
+    'InferencePngDataset',
 ]
 
 
@@ -76,7 +79,7 @@ class XRayAnomalyValidationDataset(XRayAnomalyDataset):
         return index, super().__getitem__(index)
 
 
-class InferenceDicomDataset(Dataset):
+class InferenceDataset(Dataset, metaclass=ABCMeta):
 
     def __init__(self, image_dir: Path, transform: Optional[Union[Compose, BasicTransform]] = None) -> None:
         self.transform = transform
@@ -85,13 +88,29 @@ class InferenceDicomDataset(Dataset):
 
     def __getitem__(self, index: int) -> Tuple[int, torch.Tensor]:
         image_file = self.file_list[index]
-        image = read_xray(image_file)
+        image = self._read_image(image_file)
         if self.transform is not None:
             image = self.transform(image=image)['image']
         return index, image
 
     def __len__(self) -> int:
         return len(self.file_list)
+
+    @abstractmethod
+    def _read_image(self, image_file: Path) -> np.ndarray:
+        pass
+
+
+class InferenceDicomDataset(InferenceDataset):
+
+    def _read_image(self, image_file: Path) -> np.ndarray:
+        return read_xray(image_file)
+
+
+class InferencePngDataset(InferenceDataset):
+
+    def _read_image(self, image_file: Path) -> np.ndarray:
+        return np.array(pil_loader(image_file))
 
 
 # Code by raddar from https://www.kaggle.com/raddar/convert-dicom-to-np-array-the-correct-way

@@ -7,7 +7,8 @@ import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
-from .dataset import InferenceDicomDataset, XRayAnomalyDataset, XRayAnomalyValidationDataset
+from .dataset import InferenceDataset, InferenceDicomDataset, InferencePngDataset, XRayAnomalyDataset, \
+    XRayAnomalyValidationDataset
 from .transforms import test_transform, train_aggressive_transform, train_transform
 from ..conf.data import DataConfig
 
@@ -44,7 +45,7 @@ class XRayDataModule(LightningDataModule):
         self.predict_data_dir = Path(data_config.predict.data_dir)
         self.train_dataset: XRayAnomalyDataset = None
         self.validation_dataset: XRayAnomalyValidationDataset = None
-        self.predict_dataset: InferenceDicomDataset = None
+        self.predict_dataset: InferenceDataset = None
 
     def prepare_data(self, *args, **kwargs) -> None:
         os.system(f'dvc pull {os.fspath(self.train_data_dir)}')
@@ -64,7 +65,10 @@ class XRayDataModule(LightningDataModule):
             ignore_images_without_objects=False,  # TODO: Check me
             read_dicom=self.config.train.loader.load_dicom,
         )
-        self.predict_dataset = InferenceDicomDataset(self.predict_data_dir, self.test_transforms)
+        if self.config.predict.loader.load_dicom:
+            self.predict_dataset = InferenceDicomDataset(self.predict_data_dir, self.test_transforms)
+        else:
+            self.predict_dataset = InferencePngDataset(self.predict_data_dir, self.test_transforms)
 
     def train_dataloader(self) -> DataLoader:
         return DataLoader(
