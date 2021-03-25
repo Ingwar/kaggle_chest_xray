@@ -20,13 +20,21 @@ class XRayDataModule(LightningDataModule):
 
     def __init__(self, data_config: DataConfig) -> None:
         if data_config.train.augment:
-            train_time_transform = train_aggressive_transform(data_config.train.crop.width, data_config.train.crop.height)
+            train_time_transform = train_aggressive_transform(
+                data_config.train.loader.load_dicom,
+                data_config.train.crop.width,
+                data_config.train.crop.height
+            )
         else:
-            train_time_transform = train_transform(data_config.train.crop.width, data_config.train.crop.height)
+            train_time_transform = train_transform(
+                data_config.train.loader.load_dicom,
+                data_config.train.crop.width,
+                data_config.train.crop.height
+            )
         super().__init__(
             train_transforms=train_time_transform,
-            val_transforms=test_transform(),
-            test_transforms=test_transform()
+            val_transforms=test_transform(data_config.validation.loader.load_dicom),
+            test_transforms=test_transform(data_config.predict.loader.load_dicom)
         )
         self.config = data_config
         self.train_data_dir = Path(data_config.train.data_dir)
