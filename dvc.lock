@@ -12,3 +12,15 @@ stages:
       md5: 4e789101793d2be6313fca5918d5806d.dir
       size: 42072379041
       nfiles: 15000
+  convert_test_to_png:
+    cmd: convert-to-png data/test data/test_png
+    deps:
+    - path: data/test
+      md5: f565a50253054f9273a2937f52eb067e.dir
+      size: 33523408062
+      nfiles: 3000
+    outs:
+    - path: data/test_png
+      md5: a289e9b7b36edb6ae82a803c260f0e7b.dir
+      size: 7860120689
+      nfiles: 3000

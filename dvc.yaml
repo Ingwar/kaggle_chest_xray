@@ -5,3 +5,9 @@ stages:
     - data/train
     outs:
     - data/train_png
+  convert_test_to_png:
+    cmd: convert-to-png data/test data/test_png
+    deps:
+    - data/test
+    outs:
+    - data/test_png
