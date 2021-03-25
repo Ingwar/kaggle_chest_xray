@@ -3,7 +3,7 @@ from typing import Any, List
 import numpy as np
 from albumentations import BasicTransform, BboxParams, Compose, Flip, GaussNoise, Lambda, RandomBrightnessContrast, \
     RandomRotate90, \
-    RandomSizedBBoxSafeCrop
+    RandomSizedBBoxSafeCrop, ToFloat
 from albumentations.pytorch import ToTensorV2
 
 __all__ = [
@@ -20,6 +20,7 @@ def train_transform(crop_width: int, crop_height: int, additional_transforms: Li
         RandomSizedBBoxSafeCrop(width=crop_width, height=crop_height, erosion_rate=0.2),
     ]
     final_transforms = [
+        ToFloat(),
         ToTensorV2(),
     ]
     transforms = initial_transforms + additional_transforms + final_transforms
@@ -39,6 +40,7 @@ def train_aggressive_transform(crop_width: int, crop_height: int) -> Compose:
 def test_transform() -> Compose:
     return Compose([
         Lambda(image=stack_channels_for_rgb),
+        ToFloat(),
         ToTensorV2(),
     ])
 
