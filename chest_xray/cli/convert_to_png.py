@@ -1,4 +1,6 @@
 from argparse import ArgumentParser
+from functools import partial
+from multiprocessing import Pool
 from pathlib import Path
 
 from PIL import Image
@@ -14,11 +16,18 @@ def run() -> None:
     args = parser.parse_args()
     input_files = list(args.input_dir.glob('*.dicom'))
     args.output_dir.mkdir(exist_ok=True, parents=True)
-    for image_file in tqdm(input_files):
-        image_data = read_xray(image_file)
-        image = Image.fromarray(image_data)
-        image_name = image_file.stem
-        image.save(args.output_dir / f'{image_name}.png')
+    output_dir = args.output_dir
+    pool = Pool()
+    convert = partial(convert_to_png, output_dir=output_dir)
+    for i in tqdm(pool.imap_unordered(convert, input_files)):
+        pass
+
+
+def convert_to_png(image_file: Path, output_dir: Path) -> None:
+    image_data = read_xray(image_file)
+    image = Image.fromarray(image_data)
+    image_name = image_file.stem
+    image.save(output_dir / f'{image_name}.png')
 
 
 if __name__ == '__main__':
