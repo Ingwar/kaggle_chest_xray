@@ -9,6 +9,7 @@ data:
     loader:
       batch_size: ${data.default_loader.batch_size}
       num_workers: ${data.default_loader.num_workers}
+      load_dicom: ${data.default_loader.load_dicom}
     crop:
       width: 800
       height: 800
@@ -19,14 +20,17 @@ data:
     loader:
       batch_size: ${data.default_loader.batch_size}
       num_workers: ${data.default_loader.num_workers}
+      load_dicom: ${data.default_loader.load_dicom}
   predict:
     data_dir: data/test
     loader:
       batch_size: ${data.default_loader.batch_size}
       num_workers: ${data.default_loader.num_workers}
+      load_dicom: ${data.default_loader.load_dicom}
   default_loader:
-    batch_size: 12
+    batch_size: 32
     num_workers: 48
+    load_dicom: true
 
 model:
   backbone: resnet50

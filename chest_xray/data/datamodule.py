@@ -43,12 +43,18 @@ class XRayDataModule(LightningDataModule):
         os.system(f'dvc pull {os.fspath(self.predict_data_dir)}')
 
     def setup(self, stage: Optional[str] = None) -> None:
-        self.train_dataset = XRayAnomalyDataset(self.train_data_dir, self.train_metadata, self.train_transforms)
+        self.train_dataset = XRayAnomalyDataset(
+            self.train_data_dir,
+            self.train_metadata,
+            self.train_transforms,
+            read_dicom=self.config.train.loader.load_dicom
+        )
         self.validation_dataset = XRayAnomalyValidationDataset(
             self.validation_data_dir,
             self.validation_metadata,
             self.val_transforms,
             ignore_images_without_objects=False,  # TODO: Check me
+            read_dicom=self.config.train.loader.load_dicom,
         )
         self.predict_dataset = InferenceDicomDataset(self.predict_data_dir, self.test_transforms)
 

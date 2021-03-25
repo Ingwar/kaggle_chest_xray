@@ -17,6 +17,7 @@ class CropInfo:
 class DataLoadingConfig:
     batch_size: int = MISSING
     num_workers: int = MISSING
+    load_dicom: bool = MISSING
 
 
 @dataclass
