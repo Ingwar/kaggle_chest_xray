@@ -9,6 +9,7 @@ import torch
 from albumentations import BasicTransform, Compose
 from pydicom.pixel_data_handlers import apply_voi_lut
 from torch.utils.data import Dataset
+from torchvision.datasets.folder import pil_loader
 
 __all__ = [
     'XRayAnomalyDataset',
@@ -25,16 +26,22 @@ class XRayAnomalyDataset(Dataset):
         metadata_file: Path,
         transform: Optional[Union[Compose, BasicTransform]] = None,
         ignore_images_without_objects: bool = True,
-        background_class: int = 14
+        background_class: int = 14,
+        read_dicom: bool = True,
     ) -> None:
         metadata = pd.read_csv(metadata_file)
         if ignore_images_without_objects:
             metadata = metadata[metadata['class_id'] != background_class]
+        if read_dicom:
+            suffix = 'dicom'
+        else:
+            suffix = 'png'
         self.image_ids = pd.unique(metadata['image_id'])
-        self.file_list = [data_dir / f'{image_id}.dicom' for image_id in self.image_ids]
+        self.file_list = [data_dir / f'{image_id}.{suffix}' for image_id in self.image_ids]
         self.metadata = metadata
         self.transform = transform
         self.background_class = background_class
+        self.read_dicom = read_dicom
 
     def __getitem__(self, index: int) -> Dict[str, torch.Tensor]:
         image_file = self.file_list[index]
@@ -47,7 +54,10 @@ class XRayAnomalyDataset(Dataset):
             boxes.append([row.x_min, row.y_min, row.x_max, row.y_max])
         labels = np.array(labels)
         boxes = np.array(boxes)
-        image = read_xray(image_file)
+        if self.read_dicom:
+            image = read_xray(image_file)
+        else:
+            image = np.array(pil_loader(image_file))
         result = {'image': image, 'boxes': boxes, 'labels': labels}
         if self.transform is not None:
             result = self.transform(image=image, bboxes=boxes, labels=labels)
