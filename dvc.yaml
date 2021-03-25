@@ -1,0 +1,7 @@
+stages:
+  convert_train_to_png:
+    cmd: convert-to-png data/train data/train_png
+    deps:
+    - data/train
+    outs:
+    - data/train_png
