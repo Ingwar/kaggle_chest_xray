@@ -23,14 +23,12 @@ class XRayDataModule(LightningDataModule):
         if data_config.train.augment:
             train_time_transform = train_aggressive_transform(
                 data_config.train.loader.load_dicom,
-                data_config.train.crop.width,
-                data_config.train.crop.height
+                data_config.train.longest_size,
             )
         else:
             train_time_transform = train_transform(
                 data_config.train.loader.load_dicom,
-                data_config.train.crop.width,
-                data_config.train.crop.height
+                data_config.train.longest_size,
             )
         super().__init__(
             train_transforms=train_time_transform,

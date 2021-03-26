@@ -1,9 +1,10 @@
 from typing import Any, List
 
 import numpy as np
-from albumentations import BasicTransform, BboxParams, Compose, Flip, GaussNoise, Lambda, RandomBrightnessContrast, \
+from albumentations import BasicTransform, BboxParams, Compose, Flip, GaussNoise, Lambda, LongestMaxSize, \
+    RandomBrightnessContrast, \
     RandomRotate90, \
-    RandomSizedBBoxSafeCrop, ToFloat
+    ShiftScaleRotate, ToFloat
 from albumentations.pytorch import ToTensorV2
 
 __all__ = [
@@ -15,14 +16,12 @@ __all__ = [
 
 def train_transform(
     from_dicom: bool,
-    crop_width: int,
-    crop_height: int,
+    longest_max_size: int,
     additional_transforms: List[BasicTransform] = None
 ) -> Compose:
     additional_transforms = additional_transforms if additional_transforms is not None else []
     initial_transforms = [
-        RandomSizedBBoxSafeCrop(width=crop_width, height=crop_height, erosion_rate=0.2),
-        # LongestMaxSize(800),
+        LongestMaxSize(longest_max_size),
     ]
     if from_dicom:
         initial_transforms.insert(0, Lambda(image=stack_channels_for_rgb))
@@ -34,7 +33,7 @@ def train_transform(
     return Compose(transforms, bbox_params=BboxParams(format='pascal_voc', label_fields=['labels']))
 
 
-def train_aggressive_transform(from_dicom: bool, crop_width: int, crop_height: int) -> Compose:
+def train_aggressive_transform(from_dicom: bool, longest_max_size: int) -> Compose:
     additional_transforms = [
         Flip(),
         RandomRotate90(),
@@ -42,7 +41,7 @@ def train_aggressive_transform(from_dicom: bool, crop_width: int, crop_height: i
         RandomBrightnessContrast(),
         GaussNoise(),
     ]
-    return train_transform(from_dicom, crop_width, crop_height, additional_transforms)
+    return train_transform(from_dicom, longest_max_size, additional_transforms)
 
 
 def test_transform(from_dicom: bool) -> Compose:

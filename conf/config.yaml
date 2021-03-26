@@ -10,9 +10,7 @@ data:
       batch_size: ${data.default_loader.batch_size}
       num_workers: ${data.default_loader.num_workers}
       load_dicom: ${data.default_loader.load_dicom}
-    crop:
-      width: 800
-      height: 800
+    longest_size: 800
     augment: true
   validation:
     data_dir: ${data.train.data_dir}

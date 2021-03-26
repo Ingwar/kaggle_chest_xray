@@ -8,12 +8,6 @@ __all__ = [
 
 
 @dataclass
-class CropInfo:
-    width: int = MISSING
-    height: int = MISSING
-
-
-@dataclass
 class DataLoadingConfig:
     batch_size: int = MISSING
     num_workers: int = MISSING
@@ -24,7 +18,7 @@ class DataLoadingConfig:
 class TrainDataConfig:
     data_dir: str = MISSING
     metadata: str = MISSING
-    crop: CropInfo = CropInfo()
+    longest_size: int = MISSING
     augment: bool = MISSING
     loader: DataLoadingConfig = DataLoadingConfig()
 
