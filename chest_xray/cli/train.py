@@ -16,8 +16,6 @@ def run() -> None:
 
     silence_pydicom_warnings()
 
-
-    trainer = Trainer.from_argparse_args(args, callbacks=[checkpoints, LearningRateMonitor()])
     if config.data.validation is not None:
         data = XRayDataModule(config.data)
         checkpoints = ModelCheckpoint(
@@ -30,6 +28,7 @@ def run() -> None:
     else:
         data = XRayTrainOnlyDataModule(config.data)
         checkpoints = ModelCheckpoint(save_top_k=-1, save_last=True)
+    trainer = Trainer.from_argparse_args(args, callbacks=[checkpoints, LearningRateMonitor()])
     experiment = Experiment(config)
     trainer.fit(experiment, datamodule=data)
     report_checkpoints(checkpoints)
