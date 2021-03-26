@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from omegaconf import MISSING
 
@@ -39,7 +40,7 @@ class PredictDataConfig:
 @dataclass
 class DataConfig:
     train: TrainDataConfig = TrainDataConfig()
-    validation: ValidationDataConfig = ValidationDataConfig()
+    validation: Optional[ValidationDataConfig] = ValidationDataConfig()
     predict: PredictDataConfig = PredictDataConfig()
     default_loader: DataLoadingConfig = DataLoadingConfig()
 

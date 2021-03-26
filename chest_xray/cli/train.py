@@ -4,7 +4,7 @@ from pytorch_lightning.utilities import rank_zero_only
 
 from .args import setup_common_cli_parser
 from .hydra import parse_hydra_config
-from ..data.datamodule import XRayDataModule
+from ..data.datamodule import XRayDataModule, XRayTrainOnlyDataModule
 from ..model.experiment import Experiment
 from ..utils import silence_pydicom_warnings
 
@@ -18,7 +18,10 @@ def run() -> None:
 
     checkpoints = ModelCheckpoint(monitor='mAP', filename='{epoch}_{mAP:.3f}', save_top_k=5, mode='max', save_last=True)
     trainer = Trainer.from_argparse_args(args, callbacks=[checkpoints, LearningRateMonitor()])
-    data = XRayDataModule(config.data)
+    if config.data.validation is not None:
+        data = XRayDataModule(config.data)
+    else:
+        data = XRayTrainOnlyDataModule(config.data)
     experiment = Experiment(config)
     trainer.fit(experiment, datamodule=data)
     report_checkpoints(checkpoints)

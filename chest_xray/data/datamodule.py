@@ -14,11 +14,11 @@ from ..conf.data import DataConfig
 
 __all__ = [
     'XRayDataModule',
+    'XRayTrainOnlyDataModule',
 ]
 
 
-class XRayDataModule(LightningDataModule):
-
+class BaseXRayDataModule(LightningDataModule):
     def __init__(self, data_config: DataConfig) -> None:
         if data_config.train.augment:
             train_time_transform = train_aggressive_transform(
@@ -30,16 +30,24 @@ class XRayDataModule(LightningDataModule):
                 data_config.train.loader.load_dicom,
                 data_config.train.longest_size,
             )
+        if data_config.validation is not None:
+            val_transform = test_transform(data_config.validation.loader.load_dicom)
+        else:
+            val_transform = None
         super().__init__(
             train_transforms=train_time_transform,
-            val_transforms=test_transform(data_config.validation.loader.load_dicom),
+            val_transforms=val_transform,
             test_transforms=test_transform(data_config.predict.loader.load_dicom)
         )
         self.config = data_config
         self.train_data_dir = Path(data_config.train.data_dir)
         self.train_metadata = Path(data_config.train.metadata)
-        self.validation_data_dir = Path(data_config.validation.data_dir)
-        self.validation_metadata = Path(data_config.validation.metadata)
+        if data_config.validation is not None:
+            self.validation_data_dir = Path(data_config.validation.data_dir)
+            self.validation_metadata = Path(data_config.validation.metadata)
+        else:
+            self.validation_data_dir = None
+            self.validation_metadata = None
         self.predict_data_dir = Path(data_config.predict.data_dir)
         self.train_dataset: XRayAnomalyDataset = None
         self.validation_dataset: XRayAnomalyValidationDataset = None
@@ -49,6 +57,9 @@ class XRayDataModule(LightningDataModule):
         os.system(f'dvc pull {os.fspath(self.train_data_dir)}')
         os.system(f'dvc pull {os.fspath(self.predict_data_dir)}')
 
+
+class XRayTrainOnlyDataModule(BaseXRayDataModule):
+
     def setup(self, stage: Optional[str] = None) -> None:
         self.train_dataset = XRayAnomalyDataset(
             self.train_data_dir,
@@ -56,6 +67,22 @@ class XRayDataModule(LightningDataModule):
             self.train_transforms,
             read_dicom=self.config.train.loader.load_dicom
         )
+
+    def train_dataloader(self) -> DataLoader:
+        return DataLoader(
+            self.train_dataset,
+            batch_size=self.config.train.loader.batch_size,
+            shuffle=True,
+            num_workers=self.config.train.loader.num_workers,
+            pin_memory=True,
+            collate_fn=train_collate_fn
+        )
+
+
+class XRayDataModule(XRayTrainOnlyDataModule):
+
+    def setup(self, stage: Optional[str] = None) -> None:
+        super().setup(stage)
         self.validation_dataset = XRayAnomalyValidationDataset(
             self.validation_data_dir,
             self.validation_metadata,
@@ -67,16 +94,6 @@ class XRayDataModule(LightningDataModule):
             self.predict_dataset = InferenceDicomDataset(self.predict_data_dir, self.test_transforms)
         else:
             self.predict_dataset = InferencePngDataset(self.predict_data_dir, self.test_transforms)
-
-    def train_dataloader(self) -> DataLoader:
-        return DataLoader(
-            self.train_dataset,
-            batch_size=self.config.train.loader.batch_size,
-            shuffle=True,
-            num_workers=self.config.train.loader.num_workers,
-            pin_memory=True,
-            collate_fn=train_collate_fn
-        )
 
     def val_dataloader(self) -> DataLoader:
         return DataLoader(
