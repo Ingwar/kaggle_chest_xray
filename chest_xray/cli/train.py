@@ -4,6 +4,7 @@ from pytorch_lightning.utilities import rank_zero_only
 
 from .args import setup_common_cli_parser
 from .hydra import parse_hydra_config
+from ..callbacks import MixupData
 from ..data.datamodule import XRayDataModule, XRayTrainOnlyDataModule
 from ..model.experiment import Experiment
 from ..utils import silence_pydicom_warnings
@@ -28,7 +29,10 @@ def run() -> None:
     else:
         data = XRayTrainOnlyDataModule(config.data)
         checkpoints = ModelCheckpoint(save_top_k=-1, save_last=True)
-    trainer = Trainer.from_argparse_args(args, callbacks=[checkpoints, LearningRateMonitor()])
+    callbacks = [checkpoints, LearningRateMonitor()]
+    if config.data.train.use_mixup:
+        callbacks.append(MixupData(warmup_epochs=config.data.train.mixup_warmup_epochs))
+    trainer = Trainer.from_argparse_args(args, callbacks=callbacks)
     experiment = Experiment(config)
     trainer.fit(experiment, datamodule=data)
     report_checkpoints(checkpoints)

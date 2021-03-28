@@ -21,6 +21,8 @@ class TrainDataConfig:
     metadata: str = MISSING
     longest_size: int = MISSING
     augment: bool = MISSING
+    use_mixup: bool = False
+    mixup_warmup_epochs: int = 0
     loader: DataLoadingConfig = DataLoadingConfig()
 
 

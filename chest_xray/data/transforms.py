@@ -4,7 +4,7 @@ import numpy as np
 from albumentations import BasicTransform, BboxParams, Compose, Flip, GaussNoise, Lambda, LongestMaxSize, \
     RandomBrightnessContrast, \
     RandomRotate90, \
-    ShiftScaleRotate, ToFloat
+    ToFloat
 from albumentations.pytorch import ToTensorV2
 
 __all__ = [
@@ -37,7 +37,6 @@ def train_aggressive_transform(from_dicom: bool, longest_max_size: int) -> Compo
     additional_transforms = [
         Flip(),
         RandomRotate90(),
-        # ShiftScaleRotate(),
         RandomBrightnessContrast(),
         GaussNoise(),
     ]
