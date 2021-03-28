@@ -1,3 +1,4 @@
+import torch
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from pytorch_lightning.utilities import rank_zero_only
@@ -16,6 +17,7 @@ def run() -> None:
     config = parse_hydra_config(args)
 
     silence_pydicom_warnings()
+    torch.multiprocessing.set_sharing_strategy('file_system')
 
     if config.data.validation is not None:
         data = XRayDataModule(config.data)

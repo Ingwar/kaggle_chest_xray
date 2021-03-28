@@ -74,7 +74,7 @@ class XRayTrainOnlyDataModule(BaseXRayDataModule):
             batch_size=self.config.train.loader.batch_size,
             shuffle=True,
             num_workers=self.config.train.loader.num_workers,
-            pin_memory=True,
+            #pin_memory=True,
             collate_fn=train_collate_fn
         )
 
@@ -100,7 +100,7 @@ class XRayDataModule(XRayTrainOnlyDataModule):
             self.validation_dataset,
             batch_size=self.config.validation.loader.batch_size,
             num_workers=self.config.validation.loader.num_workers,
-            pin_memory=True,
+            #pin_memory=True,
             collate_fn=validation_collate_fn
         )
 
