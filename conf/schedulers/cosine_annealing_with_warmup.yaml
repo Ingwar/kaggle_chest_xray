@@ -3,4 +3,3 @@
   scheduler:
     _target_: chest_xray.model.schedulers.CosineDecayWithWarmupScheduler
     max_lr: ${optimizer.lr}
-    total_epochs: 100

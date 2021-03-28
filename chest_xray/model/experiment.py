@@ -14,6 +14,7 @@ from ..conf import PipelineConfig
 __all__ = [
     'Experiment',
 ]
+WARMUP_SCHEDULER = 'chest_xray.model.schedulers.CosineDecayWithWarmupScheduler'
 
 MetadataDict = Dict[str, torch.Tensor]
 
@@ -93,7 +94,10 @@ class Experiment(LightningModule):
         schedulers = []
         for scheduler_conf in self.conf.schedulers:
             scheduler_conf = OmegaConf.to_container(scheduler_conf, resolve=True)
-            scheduler = instantiate(scheduler_conf['scheduler'], optimizer)
+            if scheduler_conf['scheduler']['_target_'] == WARMUP_SCHEDULER:
+                scheduler = instantiate(scheduler_conf['scheduler'], optimizer, total_epochs=self.trainer.max_epochs)
+            else:
+                scheduler = instantiate(scheduler_conf['scheduler'], optimizer)
             scheduler_conf['scheduler'] = scheduler
             schedulers.append(scheduler_conf)
         return [optimizer], schedulers
