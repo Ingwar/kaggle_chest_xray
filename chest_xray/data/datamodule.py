@@ -65,7 +65,8 @@ class XRayTrainOnlyDataModule(BaseXRayDataModule):
             self.train_data_dir,
             self.train_metadata,
             self.train_transforms,
-            read_dicom=self.config.train.loader.load_dicom
+            read_dicom=self.config.train.loader.load_dicom,
+            ignore_images_without_objects=self.config.train.ignore_images_without_objects
         )
 
     def train_dataloader(self) -> DataLoader:

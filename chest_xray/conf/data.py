@@ -20,6 +20,7 @@ class TrainDataConfig:
     data_dir: str = MISSING
     metadata: str = MISSING
     longest_size: int = MISSING
+    ignore_images_without_objects: bool = True
     augment: bool = MISSING
     use_mixup: bool = False
     mixup_warmup_epochs: int = 0

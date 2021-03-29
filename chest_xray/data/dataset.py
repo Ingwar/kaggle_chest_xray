@@ -43,6 +43,7 @@ class XRayAnomalyDataset(Dataset):
         self.file_list = [data_dir / f'{image_id}.{suffix}' for image_id in self.image_ids]
         self.metadata = metadata
         self.transform = transform
+        self.ignore_images_without_objects = ignore_images_without_objects
         self.background_class = background_class
         self.read_dicom = read_dicom
 
@@ -52,7 +53,9 @@ class XRayAnomalyDataset(Dataset):
         image_metadata = self.metadata[self.metadata['image_id'] == image_id]
         boxes = []
         labels = []
-        for row in image_metadata[image_metadata['class_id'] != self.background_class].itertuples(index=False):
+        if self.ignore_images_without_objects:
+            image_metadata = image_metadata[image_metadata['class_id'] != self.background_class]
+        for row in image_metadata.itertuples(index=False):
             labels.append(row.class_id + 1)  # Torchvision expects that 0 is a background class
             boxes.append([row.x_min, row.y_min, row.x_max, row.y_max])
         labels = np.array(labels)

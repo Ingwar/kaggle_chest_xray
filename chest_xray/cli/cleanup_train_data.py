@@ -10,6 +10,7 @@ def run() -> None:
     parser.add_argument('input_file', type=Path)
     parser.add_argument('output_file', type=Path)
     parser.add_argument('--no-finding-class', type=int, default=14)
+    parser.add_argument('--add-fake-box-for-no-findings', action='store_true')
     parser.add_argument('--threshold', type=float, default=0.5)
     args = parser.parse_args()
 
@@ -23,6 +24,12 @@ def run() -> None:
             if len(image_info) != len(no_finding_image_info):
                 raise ValueError(f'Image {image_id} has both finding and no findings')
             image_info = image_info.drop(columns='rad_id').drop_duplicates(['image_id'])
+            if args.add_fake_box_for_no_findings:
+                image_info['x_min'] = 0.0
+                image_info['y_min'] = 0.0
+                image_info['x_max'] = 1.0
+                image_info['y_max'] = 1.0
+
         image_info_averaged = averageCoordinates(image_info, args.threshold)
         new_image_info.append(image_info_averaged)
     train_with_averaged_coordinates = pd.concat(new_image_info)
