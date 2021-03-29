@@ -23,6 +23,7 @@ kaggle = "^1.5.12"
 [tool.poetry.scripts]
 split-train-val = 'chest_xray.cli.split_train_val:main'
 convert-to-png = 'chest_xray.cli.convert_to_png:run'
+cleanup-train-data = 'chest_xray.cli.cleanup_train_data:run'
 train = 'chest_xray.cli.train:run'
 validate = 'chest_xray.cli.validate:run'
 predict = 'chest_xray.cli.predict:run'
