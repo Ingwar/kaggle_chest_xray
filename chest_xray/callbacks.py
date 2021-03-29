@@ -58,7 +58,7 @@ def mixup_two_images(image1: ImageWithMetadata, image2: ImageWithMetadata, lambd
 
     mixed_image = torch.zeros(3, new_height, new_width)
     mixed_image[:, :image1.shape[1], :image1.shape[2]] = image1 * lambda_coeff
-    mixed_image[:, :image2.shape[2], :image2.shape[2]] += image2 * (1 - lambda_coeff)
+    mixed_image[:, :image2.shape[1], :image2.shape[2]] += image2 * (1 - lambda_coeff)
     mixed_labels = torch.cat([metadata1['labels'], metadata2['labels']], dim=0)
     mixed_boxes = torch.cat([metadata1['boxes'], metadata2['boxes']], dim=0)
     mixed_metadata = {'label': mixed_labels, 'boxes': mixed_boxes}
